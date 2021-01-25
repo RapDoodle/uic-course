@@ -2,10 +2,11 @@
 // @name         UIC Course Add/Drop Helper
 // @namespace    https://uic.edu.hk/
 // @require      http://code.jquery.com/jquery-1.8.3.min.js
-// @version      1.2
+// @version      1.3
 // @description  Select the ******* course
 // @author       CST Student
 // @match        *://mis.uic.edu.hk/mis/student/as/home.do*
+// @match        *://mis.uic.edu.cn/mis/student/as/home.do*
 // @compatible   chrome
 // @compatible   firefox
 // @grant        none

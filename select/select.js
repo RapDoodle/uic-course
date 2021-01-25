@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         UIC Course Selection Helper
 // @namespace    https://uic.edu.hk/
-// @require      http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
-// @version      1.2
+// @require      http://code.jquery.com/jquery-1.8.3.min.js
+// @version      1.3
 // @description  Select the ******* course
 // @author       CST Student
 // @match        *://mis.uic.edu.hk/mis/student/*
+// @match        *://mis.uic.edu.cn/mis/student/*
 // @compatible   chrome
 // @compatible   firefox
 // @grant        none
@@ -16,7 +17,7 @@
 
     var myTimer;
     var serverTime;
-    var formalRunTime = new Date('7 Aug 2020 10:00:02 GMT+0800');
+    var formalRunTime = new Date('26 Jan 2021 10:00:02 GMT+0800');
     var maxIter = 2;
     var iterCount = 0;
     var scheduled = false;
@@ -45,6 +46,12 @@
 
     function schedule() {
         scheduled = !scheduled;
+        if (scheduled) {
+            console.log('Please check the following information: ')
+            document.electiveform.id.value = document.getElementById('courseIdTextField').value;
+            console.log('electiveTypeId: ' + document.electiveform.electiveTypeId.value);
+            console.log('courseId: ' + document.electiveform.id.value);
+        }
         console.log('Scheduled: ' + scheduled);
     }
 
@@ -84,7 +91,7 @@
             if (scheduled) {
                 var countDown = (formalRunTime.getTime() - serverTime.getTime()) / 1000;
                 document.getElementById('scheduledTimeLabel').innerHTML = 'Scheduled at: ' + formalRunTime + ' Count down: ' + countDown;
-                
+
                 if (serverTime >= formalRunTime) {
                     scheduled = false;
                     console.log('Lift off!!');
@@ -112,5 +119,5 @@
             }
         });
     });
-    
+
 })();
