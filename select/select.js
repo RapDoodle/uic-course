@@ -2,7 +2,7 @@
 // @name         UIC Course Selection Helper
 // @namespace    https://uic.edu.hk/
 // @require      http://code.jquery.com/jquery-1.8.3.min.js
-// @version      1.3
+// @version      1.4
 // @description  Select the ******* course
 // @author       CST Student
 // @match        *://mis.uic.edu.hk/mis/student/*
@@ -17,7 +17,7 @@
 
     var myTimer;
     var serverTime;
-    var formalRunTime = new Date('26 Jan 2021 10:00:02 GMT+0800');
+    var formalRunTime = new Date('5 Aug 2021 16:00:02 GMT+0800');
     var maxIter = 2;
     var iterCount = 0;
     var scheduled = false;
@@ -27,11 +27,34 @@
         var button = "<button type='button' id='myschedule'>Schedule</button>"
         button += "<button type='button' id='mystart'>Start</button>";
         button += "<button type='button' id='mystop'>Stop</button><br>";
-        var classIdTextField = "<input type='text' id='courseIdTextField'></input><br>"
-        var serverTimeLabel = "<p id='serverTimeIndi' style='color: white; background-color: black;'></p>"
-        var scheduledTimeLabel = "<p id='scheduledTimeLabel' style='color: white; background-color: black;'></p>"
+        var classIdTextField = "<input type='text' id='courseIdTextField'></input><br>";
+        var serverTimeLabel = "<p id='serverTimeIndi' style='color: white; background-color: black;'></p>";
+        var courseNameLabel = "<p id='courseNameLabel' style='color: white; background-color: black;'></p>";
+        var scheduledTimeLabel = "<p id='scheduledTimeLabel' style='color: white; background-color: black;'></p>";
         var tmp = wrap.innerHTML;
-        wrap.innerHTML = tmp + button + classIdTextField + serverTimeLabel + scheduledTimeLabel;
+        wrap.innerHTML = tmp + button + classIdTextField + serverTimeLabel + courseNameLabel + scheduledTimeLabel;
+        document.getElementById('courseIdTextField').addEventListener('input', updateCourseName);
+    }
+
+    function updateCourseName() {
+        document.electiveform.id.value = document.getElementById('courseIdTextField').value;
+        var courseNameLabelValue = document.electiveform.id.value;
+        if (courseNameLabelValue.length > 0) {
+            var tds = document.getElementsByTagName('td');
+            var found = false;
+            for(var i=0; i < tds.length; i++) {
+                if (courseNameLabelValue === tds[i].id) {
+                    document.getElementById('courseNameLabel').innerHTML = 'Selected course name: ' + tds[i].innerText;
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                document.getElementById('courseNameLabel').innerHTML = '[WARNING] Invalid course id.';
+            }
+        } else {
+            document.getElementById('courseNameLabel').innerHTML = 'No course selected.';
+        }
     }
 
     function submitSelectedCourse() {
