@@ -1,12 +1,12 @@
 // ==UserScript==
-// @name         UIC Course Add/Drop Helper
+// @name         UIC Course Selection Helper
 // @namespace    https://uic.edu.hk/
 // @require      http://code.jquery.com/jquery-1.8.3.min.js
-// @version      1.3
+// @version      1.5
 // @description  Select the ******* course
 // @author       CST Student
-// @match        *://mis.uic.edu.hk/mis/student/as/*
-// @match        *://mis.uic.edu.cn/mis/student/as/*
+// @match        *://mis.uic.edu.hk/mis/student/*
+// @match        *://mis.uic.edu.cn/mis/student/*
 // @compatible   chrome
 // @compatible   firefox
 // @grant        none
@@ -17,57 +17,77 @@
 
     var myTimer;
     var serverTime;
-    var formalRunTime = new Date('28 Sep 2020 19:00:02 GMT+0800');
-    var maxIter = 1;
+    var formalRunTime = new Date('8 Aug 2021 09:00:02 GMT+0800');
+    var maxIter = 2;
     var iterCount = 0;
     var scheduled = false;
-    var type = 'add';
 
     if (document.getElementById("header")) {
         var wrap = document.getElementById("header");
         var button = "<button type='button' id='myschedule'>Schedule</button>"
         button += "<button type='button' id='mystart'>Start</button>";
         button += "<button type='button' id='mystop'>Stop</button><br>";
-        var radios = "Type: <input type='radio' id='typeAdd' name='actionType' value='add' checked='checked'>Add"
-        radios += "<input type='radio' id='typeDrop' name='actionType' value='drop'>Drop<br>"
-        var classIdTextField = "<input type='text' id='courseIdTextField'></input><br>"
-        var serverTimeLabel = "<p id='serverTimeIndi' style='color: white; background-color: black;'></p>"
-        var scheduledTimeLabel = "<p id='scheduledTimeLabel' style='color: white; background-color: black;'></p>"
+        var classIdTextField = "<input type='text' id='courseIdTextField'></input><br>";
+        var serverTimeLabel = "<p id='serverTimeIndi' style='color: white; background-color: black;'></p>";
+        var courseNameLabel = "<p id='courseNameLabel' style='color: white; background-color: black;'></p>";
+        var scheduledTimeLabel = "<p id='scheduledTimeLabel' style='color: white; background-color: black;'></p>";
         var tmp = wrap.innerHTML;
-        wrap.innerHTML = tmp + button + radios + classIdTextField + serverTimeLabel + scheduledTimeLabel;
+        wrap.innerHTML = tmp + button + classIdTextField + serverTimeLabel + courseNameLabel + scheduledTimeLabel;
+        document.getElementById('courseIdTextField').addEventListener('input', updateCourseName);
     }
 
-    function modifyCourse(type) {
+    function updateCourseName() {
+        document.electiveform.id.value = document.getElementById('courseIdTextField').value;
+        var courseNameLabelValue = document.electiveform.id.value;
+        if (courseNameLabelValue.length > 0) {
+            var tds = document.getElementsByTagName('td');
+            var found = false;
+            for(var i=0; i < tds.length; i++) {
+                if (courseNameLabelValue === tds[i].id) {
+                    document.getElementById('courseNameLabel').innerHTML = 'Selected course name: ' + tds[i].innerText;
+                    found = true;
+                } else if (courseNameLabelValue === tds[i].innerText) {
+                    document.getElementById('courseIdTextField').value = tds[i].id;
+                    updateCourseName();
+                    return;
+                }
+            }
 
-        var form = document.getElementById('frm');
-
-        if (document.getElementById('typeAdd').checked) {
-            form.action = '/mis/student/as/addSubject.do';
+            if (!found) {
+                document.getElementById('courseNameLabel').innerHTML = '[WARNING] Invalid course id.';
+            }
         } else {
-            // type is drop
-            form.action = '/mis/student/as/dropSubject.do';
+            document.getElementById('courseNameLabel').innerHTML = 'No course selected.';
         }
-        
-        form.submit();
-        console.log('Request Submitted');
+    }
 
+    function submitSelectedCourse() {
         iterCount++;
-        if (iterCount >= maxIter) {
+        if (iterCount > maxIter) {
             stop();
         }
-
+        var electiveForm = document.getElementById('electiveform');
+        electiveForm.submit();
+        console.log('Request Submitted');
     }
 
     function schedule() {
         scheduled = !scheduled;
+        if (scheduled) {
+            console.log('Please check the following information: ')
+            document.electiveform.id.value = document.getElementById('courseIdTextField').value;
+            console.log('electiveTypeId: ' + document.electiveform.electiveTypeId.value);
+            console.log('courseId: ' + document.electiveform.id.value);
+        }
         console.log('Scheduled: ' + scheduled);
     }
 
     function start() {
-        document.frm.id.value = document.getElementById('courseIdTextField').value;
-        console.log('courseId: ' + document.frm.id.value);
+        document.electiveform.id.value = document.getElementById('courseIdTextField').value;
+        console.log('electiveTypeId: ' + document.electiveform.electiveTypeId.value);
+        console.log('courseId: ' + document.electiveform.id.value);
         console.log('Service State: Running');
-        myTimer = setInterval(modifyCourse, 250);
+        myTimer = setInterval(submitSelectedCourse, 250);
     }
 
     function stop() {
@@ -98,7 +118,7 @@
             if (scheduled) {
                 var countDown = (formalRunTime.getTime() - serverTime.getTime()) / 1000;
                 document.getElementById('scheduledTimeLabel').innerHTML = 'Scheduled at: ' + formalRunTime + ' Count down: ' + countDown;
-                
+
                 if (serverTime >= formalRunTime) {
                     scheduled = false;
                     console.log('Lift off!!');
@@ -126,5 +146,5 @@
             }
         });
     });
-    
+
 })();
